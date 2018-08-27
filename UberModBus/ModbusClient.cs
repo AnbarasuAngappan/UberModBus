@@ -894,7 +894,7 @@ namespace UberModBus
                     this.tcpClient = new TcpClient();
                     IAsyncResult asyncResult = this.tcpClient.BeginConnect(this.ipAddress, this.port, (AsyncCallback)null, (object)null);
                     if (!asyncResult.AsyncWaitHandle.WaitOne(this.connectTimeout))
-                        //throw new ConnectionException("connection timed out");
+                        throw new Exception("connection timed out");
                     this.tcpClient.EndConnect(asyncResult);
                     this.stream = this.tcpClient.GetStream();
                     this.stream.ReadTimeout = this.connectTimeout;
@@ -1517,6 +1517,26 @@ namespace UberModBus
             return checked((ushort)((int)maxValue << 8 | (int)num2));
         }
 
+        ~ModbusClient()
+        {
+            if (this.debug)
+                StoreLogData.Instance.Store("Destructor called - automatically disconnect", DateTime.Now);
+            if (this.serialport != null)
+            {
+                if (!this.serialport.IsOpen)
+                    return;
+                this.serialport.Close();
+            }
+            else
+            {
+                if (!(this.tcpClient != null & !this.udpFlag))
+                    return;
+                if (this.stream != null)
+                    this.stream.Close();
+                this.tcpClient.Close();
+            }
+        }
+
         public bool Connected
         {
             get
@@ -1554,6 +1574,132 @@ namespace UberModBus
                 // ISSUE: reference to a compiler-generated field
                 this.connectedChanged((object)this);
             }
+        }
+
+        public string IPAddress
+        {
+            get
+            {
+                return this.ipAddress;
+            }
+            set
+            {
+                this.ipAddress = value;
+            }
+        }
+
+        public int Port
+        {
+            get
+            {
+                return this.port;
+            }
+            set
+            {
+                this.port = value;
+            }
+        }
+
+        public bool UDPFlag
+        {
+            get
+            {
+                return this.udpFlag;
+            }
+            set
+            {
+                this.udpFlag = value;
+            }
+        }
+
+        public byte UnitIdentifier
+        {
+            get
+            {
+                return this.unitIdentifier;
+            }
+            set
+            {
+                this.unitIdentifier = value;
+            }
+        }
+
+        public int Baudrate
+        {
+            get
+            {
+                return this.baudRate;
+            }
+            set
+            {
+                this.baudRate = value;
+            }
+        }
+
+        public Parity Parity
+        {
+            get
+            {
+                if (this.serialport != null)
+                    return this.parity;
+                return Parity.Even;
+            }
+            set
+            {
+                if (this.serialport == null)
+                    return;
+                this.parity = value;
+            }
+        }
+
+        public StopBits StopBits
+        {
+            get
+            {
+                if (this.serialport != null)
+                    return this.stopBits;
+                return StopBits.One;
+            }
+            set
+            {
+                if (this.serialport == null)
+                    return;
+                this.stopBits = value;
+            }
+        }
+
+        public int ConnectionTimeout
+        {
+            get
+            {
+                return this.connectTimeout;
+            }
+            set
+            {
+                this.connectTimeout = value;
+            }
+        }
+
+        public string LogFileFilename
+        {
+            get
+            {
+                return StoreLogData.Instance.Filename;
+            }
+            set
+            {
+                StoreLogData.Instance.Filename = value;
+                if (StoreLogData.Instance.Filename != null)
+                    this.debug = true;
+                else
+                    this.debug = false;
+            }
+        }
+
+        public enum RegisterOrder
+        {
+            LowHigh,
+            HighLow,
         }
 
         public delegate void ReceiveDataChanged(object sender);
