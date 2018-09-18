@@ -44,6 +44,10 @@ namespace UberModBus
         private SerialPort serialport;
         private NetworkStream stream;
 
+        //private int[] readHoldingRegisters = null;
+        //private int[] readInputRegisters = null;
+        //private ModbusClient modbusClient;
+
         public event ModbusClient.ReceiveDataChanged receiveDataChanged;
 
         public event ModbusClient.SendDataChanged sendDataChanged;
@@ -88,6 +92,63 @@ namespace UberModBus
             Console.WriteLine("Copyright (c) Stefan Rossmann Engineering Solutions");
             Console.WriteLine();
         }
+
+        //public int[] ReadingRegister(string ipAddress, int port, int startingAddress, int typeOfReading)
+        //{
+        //    try
+        //    {
+        //        switch (typeOfReading)
+        //        {
+        //            case 1:
+        //                if (ipAddress == null)
+        //                {
+        //                    return readHoldingRegisters;
+        //                }
+        //                else
+        //                {
+        //                    modbusClient = new ModbusClient(ipAddress, port);
+        //                    modbusClient.Connect();
+        //                    if (modbusClient.Connected)
+        //                    {
+        //                        readHoldingRegisters = modbusClient.ReadHoldingRegisters(startingAddress, 50);
+        //                        if (readHoldingRegisters != null)
+        //                        {
+        //                            return readHoldingRegisters;
+        //                        }
+        //                        return readHoldingRegisters;
+        //                    }
+        //                }
+        //                break;
+        //            case 2:
+        //                if (ipAddress == null)
+        //                {
+        //                    return readInputRegisters;
+        //                }
+        //                else
+        //                {
+        //                    modbusClient = new ModbusClient(ipAddress, port);
+        //                    modbusClient.Connect();
+        //                    if (modbusClient.Connected)
+        //                    {
+        //                        readInputRegisters = modbusClient.ReadInputRegisters(startingAddress, 50);
+        //                        if (readInputRegisters != null)
+        //                        {
+        //                            return readInputRegisters;
+        //                        }
+        //                        return readInputRegisters;
+        //                    }
+        //                }
+        //                break;
+        //            default:
+        //                break;
+        //        }
+        //        return null;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
         public int[] ReadInputRegisters(int startingAddress, int quantity)
         {
@@ -241,7 +302,7 @@ namespace UberModBus
             {
                 if (this.debug)
                     StoreLogData.Instance.Store("StartingAddressInvalidException Throwed", DateTime.Now);
-                //throw new StartingAddressInvalidException("Starting address invalid or starting address + quantity invalid");
+                throw new Exception("Starting address invalid or starting address + quantity invalid");//throw new StartingAddressInvalidException("Starting address invalid or starting address + quantity invalid");
             }
             if (numArray1[7] == (byte)132 & numArray1[8] == (byte)3)
             {
